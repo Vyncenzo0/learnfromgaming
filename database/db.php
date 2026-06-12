@@ -1,5 +1,5 @@
 php<?php
-$url_string = getenv('MYSQL_URL'); 
+$url_string = getenv('mysql://root:PDQELALsVbPLeiNKsXISbfEyTfqhgDJU@mysql.railway.internal:3306/railway'); 
 
 if (!$url_string) {
     die("Database configuration URL missing.");
