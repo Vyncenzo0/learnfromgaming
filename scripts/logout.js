@@ -1,3 +1,14 @@
+<?php
+
+header("Access-Control-Allow-Origin: https://github.io");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit(0);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logoutBtn');
 
@@ -7,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
 
             try {
-                const response = await fetch('logout.php?ajax=1');
+                const response = await fetch('https://railway.app');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP network error! Status: ${response.status}`);
