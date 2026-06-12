@@ -1,3 +1,11 @@
+<?php
+
+session_start();
+if (isset($_SESSION['errors'])) {
+  $errors = $_SESSION['errors'];
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -11,17 +19,40 @@
       <section class="card" aria-label="Login interface">
         <div class="eyebrow">Welcome back</div>
         <h1>Log in to your account</h1>
+         <?php
+    if (isset($errors['login'])) {
+      echo '<div class="error-main">
+                    <p>' . $errors['login'] . '</p>
+                    </div>';
+      unset($errors['login']);
+    }
+    ?>
+    <form method="POST" action="user-account.php">
       
         <form id="login-form" novalidate>
           <div class="field">
             <label for="student-id">Student ID</label>
             <input id="student-id" type="text" required />
           </div>
+           <?php
+        if (isset($errors['email'])) {
+          echo ' <div class="error">
+                    <p>' . $errors['student-id'] . '</p>
+                </div>';
+        }
+        ?>
 
           <div class="field">
             <label for="password">Password</label>
             <input id="password" type="password" required />
           </div>
+          <?php
+        if (isset($errors['password'])) {
+          echo ' <div class="error">
+                    <p>' . $errors['password'] . '</p>
+                </div>';
+        }
+        ?>
 
           <div class="row">
             <a class="link" href="forgot-password.html">Forgot password?</a>
@@ -37,31 +68,12 @@
       </section>
     </main>
 
-    <script>
-      const loginForm = document.getElementById('login-form');
-      const loginMessage = document.getElementById('login-message');
-
-      loginForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        const studentId = document.getElementById('student-id').value.trim();
-        const password = document.getElementById('password').value;
-        const accounts = JSON.parse(localStorage.getItem('accountsDB') || '[]');
-        const account = accounts.find((item) => item.studentId === studentId && item.password === password);
-
-        if (!account) {
-          loginMessage.textContent = 'Student ID or password is incorrect.';
-          loginMessage.style.display = 'block';
-          loginMessage.style.color = '#fca5a5';
-          return;
-        }
-
-        loginMessage.textContent = 'Login successful. Welcome back!';
-        loginMessage.style.display = 'block';
-        loginMessage.style.color = '#bbf7d0';
-        loginForm.reset();
-        window.location.href = 'start.html';
       });
     </script>
   </body>
 </html>
+<?php
+if (isset($_SESSION['errors'])) {
+  unset($_SESSION['errors']);
+}
+?>

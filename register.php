@@ -1,0 +1,128 @@
+<?php
+
+session_start();
+if (isset($_SESSION['errors'])) {
+    $errors = $_SESSION['errors'];
+ }
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account</title>
+    <link rel="stylesheet" href="styles/register.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card" aria-label="Create account interface">
+        <div class="eyebrow">New account</div>
+        <h1>Create your account</h1>
+        <p>Start with a few details and get access to your game in minutes.</p>
+        <p style="font-size: 0.92rem; color: #bfdbfe;">Tip: Use the same student ID you’ll use for password recovery later.</p>
+
+         <?php
+        if (isset($errors['user_exist'])) {
+            echo '<div class="error-main">
+                    <p>' . $errors['user_exist'] . '</p>
+                    </div>';
+                    unset($errors['user_exist']);
+        }
+        ?>
+        <form method="POST" action="user-account.php">
+        <form id="register-form" novalidate>
+          <div class="field">
+            <label for="name">Full name</label>
+            <input name="name" type="text" required />
+             <?php
+                if (isset($errors['name'])){
+                    echo ' <div class="error">
+                    <p>' . $errors['name'] . '</p>
+                </div>';
+          
+                }
+                ?>
+          </div>
+
+          <div class="field">
+            <label for="student-id">Student ID</label>
+            <input id="student-id" type="text" required />
+            <?php
+                if (isset($errors['student-id'])) {
+                    echo '<div class="error">
+                    <p>' . $errors['student-id'] . '</p>
+                    </div>';
+                    unset($errors['student-id']);
+
+                }
+                ?>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input name="password" type="password" required />
+            <?php
+                if (isset($errors['password'])) {
+                    echo '<div class="error">
+                    <p>' . $errors['password'] . '</p>
+                    </div>'
+                    ;
+                    unset($errors['password']);
+
+                }
+                ?>
+          </div>
+
+          <div class="field">
+            <label for="confirm-password">Confirm password</label>
+            <input name="confirm-password" type="password" required />
+             <?php
+                if (isset($errors['confirm_password'])) {
+                    echo '<div class="error">
+                    <p>' . $errors['confirm_password'] . '</p>
+                    </div>';
+                    unset($errors['confirm_password']);
+
+                }
+                ?>
+          </div>
+
+          <div class="field">
+            <label for="hint-question">Personal hint question</label>
+            <select id="hint-question" required>
+              <option value="" selected disabled hidden>Choose a personal hint question</option>
+              <option value="What is your favorite color?">What is your favorite color?</option>
+              <option value="What is your first pet’s name?">What is your first pet’s name?</option>
+              <option value="What city were you born in?">What city were you born in?</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="hint_answer">Personal hint answer</label>
+            <input name="hint_answer" type="text" required />
+              <?php
+                if (isset($errors['hint_answer'])) {
+                    echo '<div class="error">
+                    <p>' . $errors['hint_answer'] . '</p>
+                    </div>';
+                    unset($errors['hint_answer']);
+
+                }
+                ?>
+          </div>
+
+          <button type="submit">Create account</button>
+          <p id="register-message" class="footer-note" style="margin-top: 0; display: none;"></p>
+        </form>
+
+        <p class="footer-note">Already have an account? <a href="login.php">Sign in</a></p>
+      </section>
+    </main>
+  </body>
+</html>
+<?php
+if(isset($_SESSION['errors'])){
+unset($_SESSION['errors']);
+}
+?>

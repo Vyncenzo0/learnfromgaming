@@ -1,4 +1,4 @@
-php<?php
+<?php
 $url_string = getenv('mysql://root:PDQELALsVbPLeiNKsXISbfEyTfqhgDJU@mysql.railway.internal:3306/railway'); 
 
 if (!$url_string) {

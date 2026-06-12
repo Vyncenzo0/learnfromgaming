@@ -1,4 +1,4 @@
-const signupForm = document.getElementById('signup-form');
+const signupForm = document.getElementById('register-form');
       const signupMessage = document.getElementById('signup-message');
 
       signupForm.addEventListener('submit', (event) => {
