@@ -1,5 +1,4 @@
 <?php
-// 1. Database Connection Configuration
 $host     = 'mysql.railway.internal';
 $db       = 'YOUR_DATABASE_NAME';
 $user     = 'root';
@@ -22,7 +21,6 @@ try {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // Retrieve and sanitize user input
     $name     = trim($_POST['name'] ?? '');
     $raw_pass = trim($_POST['password'] ?? '');
     $hint     = trim($_POST['hint'] ?? '');
