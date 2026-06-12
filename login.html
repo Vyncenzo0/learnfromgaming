@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Interface</title>
+    <link rel="stylesheet" href="styles/login.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card" aria-label="Login interface">
+        <div class="eyebrow">Welcome back</div>
+        <h1>Log in to your account</h1>
+      
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="student-id">Student ID</label>
+            <input id="student-id" type="text" required />
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" required />
+          </div>
+
+          <div class="row">
+            <a class="link" href="forgot-password.html">Forgot password?</a>
+          </div>
+
+          <button type="submit">Sign in</button>
+          <p id="login-message" class="footer-note" style="margin-top: 0; display: none;"></p>
+        </form>
+
+        <div class="divider">or continue with</div>
+
+        <p class="footer-note">New here? <a href="signup.html">Create an account</a></p>
+      </section>
+    </main>
+
+    <script>
+      const loginForm = document.getElementById('login-form');
+      const loginMessage = document.getElementById('login-message');
+
+      loginForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const studentId = document.getElementById('student-id').value.trim();
+        const password = document.getElementById('password').value;
+        const accounts = JSON.parse(localStorage.getItem('accountsDB') || '[]');
+        const account = accounts.find((item) => item.studentId === studentId && item.password === password);
+
+        if (!account) {
+          loginMessage.textContent = 'Student ID or password is incorrect.';
+          loginMessage.style.display = 'block';
+          loginMessage.style.color = '#fca5a5';
+          return;
+        }
+
+        loginMessage.textContent = 'Login successful. Welcome back!';
+        loginMessage.style.display = 'block';
+        loginMessage.style.color = '#bbf7d0';
+        loginForm.reset();
+        window.location.href = 'start.html';
+      });
+    </script>
+  </body>
+</html>
