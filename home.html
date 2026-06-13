@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Quest - Web Arcade</title>
+    <link rel="stylesheet" href="styles/home.css">
+</head>
+<body>
+
+    <!-- Decorative Animated Background Grid -->
+    <div class="bg-grid"></div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">🚀 NEBULA<span>QUEST</span></div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#play">Play Zone</a>
+            <button id="logoutBtn" class="btn-logout" style="display: none;">Log Out</button>
+        </div>
+    </nav>
+
+    <!-- Hero Showcase Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <span class="badge">V1.0 Live Release</span>
+            <h1>The Ultimate Browser <br><span class="gradient-text">Space Arcade</span></h1>
+            <p>Battle across infinite cosmic sectors directly in your browser. No downloads. No installations. Pure arcade tracking mechanics.</p>
+            <div class="hero-buttons">
+                <a href="#play" class="btn btn-primary">Launch Game</a>
+                <a href="#registerSection" class="btn btn-secondary">Join Academy</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Game Features Grid -->
+    <section id="features" class="features-section">
+        <h2>Engine Features</h2>
+        <div class="features-grid">
+            <div class="card">
+                <div class="card-icon">⚡</div>
+                <h3>Instant Play</h3>
+                <p>Built completely on lightweight JavaScript pipelines for lightning-fast asset rendering loading frames.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🏆</div>
+                <h3>Global Highscores</h3>
+                <p>Synced seamlessly using cloud database engines to dynamically showcase server ranks instantly.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🛡️</div>
+                <h3>Secure Accounts</h3>
+                <p>Cryptographic hash protection algorithms guard user credentials safely from network intercepts.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Play & Authentication Zone -->
+    <section id="play" class="game-zone">
+        <div class="game-container">
+            
+            <!-- Dynamic Authentication Screen Component -->
+            <div id="authWrapper" class="auth-box">
+                <h3>Academy Registration</h3>
+                <p>Create an account to track your ship upgrades and server standings.</p>
+                
+                <!-- Registration Form Linked Directly to Railway Backend -->
+                <form action="https://railway.app" method="POST" id="registerForm">
+                    <div class="form-group">
+                        <label for="regName">Pilot Name</label>
+                        <input type="text" name="name" id="regName" placeholder="Enter custom callsign..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPass">Access Key Password</label>
+                        <input type="password" name="password" id="regPass" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regHint">Security Restore Hint</label>
+                        <input type="text" name="hint" id="regHint" placeholder="e.g., Mother's maiden name...">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Initialize Pilot File</button>
+                </form>
+            </div>
+
+            <!-- Web Game Canvas Target Frame (Hidden Until Session verified) -->
+            <div id="gameCanvasContainer" class="canvas-box" style="display: none;">
+                <div class="canvas-header">
+                    <span>🔴 Sector 01-Active Connection</span>
+                    <span id="playerNameDisplay">Pilot: Unknown</span>
+                </div>
+                <div class="mock-canvas">
+                    <!-- Your eventual HTML5 <canvas> element replaces this placeholder block -->
+                    <div class="play-trigger">
+                        <p>🚀 [ Game Engine Canvas Loaded ] 🚀</p>
+                        <span class="sub-text">Use Arrow Keys to steer. Space to fire.</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Nebula Quest Game Project. Shared deployment cluster on GitHub Pages and Railway.</p>
+    </footer>
+
+    <script src="home.js"></script>
+</body>
+</html>
