@@ -1,24 +1,35 @@
- const loginForm = document.getElementById('login-form');
-      const loginMessage = document.getElementById('login-message');
+const loginForm = document.getElementById('login-form');
+const loginMessage = document.getElementById('login-message');
 
-      loginForm.addEventListener('submit', (event) => {
-        event.preventDefault();
+loginForm.addEventListener('submit', (event) => {
+  event.preventDefault();
 
-        const email = document.getElementById('student-id').value.trim();
-        const password = document.getElementById('password').value;
-        const accounts = JSON.parse(localStorage.getItem('accountsDB') || '[]');
-        const account = accounts.find((item) => item.email === email && item.password === password);
+  const email = document.getElementById('student-id').value.trim();
+  const password = document.getElementById('password').value;
 
-        if (!account) {
-          loginMessage.textContent = 'Student ID or password is incorrect.';
-          loginMessage.style.display = 'block';
-          loginMessage.style.color = '#fca5a5';
-          return;
-        }
+  if (!email || !password) {
+    loginMessage.textContent = 'Please fill in all fields.';
+    loginMessage.style.display = 'block';
+    loginMessage.style.color = '#fca5a5';
+    return;
+  }
 
-        loginMessage.textContent = 'Login successful. Welcome back!';
-        loginMessage.style.display = 'block';
-        loginMessage.style.color = '#bbf7d0';
-        loginForm.reset();
-        window.location.href = 'home.html';
-      });
+  const accounts = JSON.parse(localStorage.getItem('accountsDB') || '[]');
+  const account = accounts.find((item) => item.email === email && item.password === password);
+
+  if (!account) {
+    loginMessage.textContent = 'Student ID or password is incorrect.';
+    loginMessage.style.display = 'block';
+    loginMessage.style.color = '#fca5a5';
+    return;
+  }
+
+  loginMessage.textContent = 'Login successful. Welcome back!';
+  loginMessage.style.display = 'block';
+  loginMessage.style.color = '#bbf7d0';
+  loginForm.reset();
+        
+  setTimeout(() => {
+    window.location.href = 'home.html';
+  }, 1000); 
+});
