@@ -4,13 +4,13 @@
       loginForm.addEventListener('submit', (event) => {
         event.preventDefault();
 
-        const email = document.getElementById('email').value.trim();
+        const email = document.getElementById('student-id').value.trim();
         const password = document.getElementById('password').value;
         const accounts = JSON.parse(localStorage.getItem('accountsDB') || '[]');
         const account = accounts.find((item) => item.email === email && item.password === password);
 
         if (!account) {
-          loginMessage.textContent = 'Gmail or password is incorrect.';
+          loginMessage.textContent = 'Student ID or password is incorrect.';
           loginMessage.style.display = 'block';
           loginMessage.style.color = '#fca5a5';
           return;
@@ -20,5 +20,5 @@
         loginMessage.style.display = 'block';
         loginMessage.style.color = '#bbf7d0';
         loginForm.reset();
-        window.location.href = 'start.html';
+        window.location.href = 'home.html';
       });
