@@ -15,7 +15,7 @@ loginForm.addEventListener('submit', (event) => {
   }
 
   const accounts = JSON.parse(localStorage.getItem('accountsDB') || '[]');
-  const account = accounts.find((item) => item.email === email && item.password === password);
+  const account = accounts.find((item) => item.studentId === studentId && item.password === password);
 
   if (!account) {
     loginMessage.textContent = 'Student ID or password is incorrect.';
