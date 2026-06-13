@@ -8,20 +8,17 @@
 </head>
 <body>
 
-    <!-- Decorative Animated Background Grid -->
     <div class="bg-grid"></div>
 
-    <!-- Main Navigation Bar -->
     <nav class="navbar">
         <div class="logo">🚀 NEBULA<span>QUEST</span></div>
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#play">Play Zone</a>
-            <button id="logoutBtn" class="btn-logout" style="display: none;">Log Out</button>
+            <button id="logoutBtnNav" class="btn-logout" style="display: none;">Log Out</button>
         </div>
     </nav>
 
-    <!-- Hero Showcase Section -->
     <header class="hero">
         <div class="hero-content">
             <span class="badge">V1.0 Live Release</span>
@@ -34,7 +31,6 @@
         </div>
     </header>
 
-    <!-- Game Features Grid -->
     <section id="features" class="features-section">
         <h2>Engine Features</h2>
         <div class="features-grid">
@@ -56,16 +52,13 @@
         </div>
     </section>
 
-    <!-- Play & Authentication Zone -->
     <section id="play" class="game-zone">
         <div class="game-container">
             
-            <!-- Dynamic Authentication Screen Component -->
             <div id="authWrapper" class="auth-box">
                 <h3>Academy Registration</h3>
                 <p>Create an account to track your ship upgrades and server standings.</p>
                 
-                <!-- Registration Form Linked Directly to Railway Backend -->
                 <form action="https://railway.app" method="POST" id="registerForm">
                     <div class="form-group">
                         <label for="regName">Pilot Name</label>
@@ -86,14 +79,15 @@
                 </form>
             </div>
 
-            <!-- Web Game Canvas Target Frame (Hidden Until Session verified) -->
             <div id="gameCanvasContainer" class="canvas-box" style="display: none;">
-                <div class="canvas-header">
-                    <span>🔴 Sector 01-Active Connection</span>
-                    <span id="playerNameDisplay">Pilot: Unknown</span>
+                <div class="canvas-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span>🔴 Sector 01-Active Connection</span>
+                        <span id="playerNameDisplay" style="margin-left: 15px;">Pilot: Unknown</span>
+                    </div>
+                    <button id="logoutBtnGame" class="btn-logout" style="cursor: pointer; padding: 4px 12px; background: #ff4a4a; color: white; border: none; border-radius: 4px; font-weight: bold;">Log Out</button>
                 </div>
                 <div class="mock-canvas">
-                    <!-- Your eventual HTML5 <canvas> element replaces this placeholder block -->
                     <div class="play-trigger">
                         <p>🚀 [ Game Engine Canvas Loaded ] 🚀</p>
                         <span class="sub-text">Use Arrow Keys to steer. Space to fire.</span>

@@ -1,24 +1,16 @@
- const loginForm = document.getElementById('login-form');
-      const loginMessage = document.getElementById('login-message');
+document.getElementById('login-form').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-      loginForm.addEventListener('submit', (event) => {
-        event.preventDefault();
+    const studentId = document.getElementById('student-id').value;
+    const password = document.getElementById('password').value;
 
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const accounts = JSON.parse(localStorage.getItem('accountsDB') || '[]');
-        const account = accounts.find((item) => item.email === email && item.password === password);
+    if (!studentId || !password) {
+        const messageBox = document.getElementById('login-message');
+        messageBox.style.display = 'block';
+        messageBox.textContent = 'Please fill out all fields.';
+        return;
+    }
 
-        if (!account) {
-          loginMessage.textContent = 'Gmail or password is incorrect.';
-          loginMessage.style.display = 'block';
-          loginMessage.style.color = '#fca5a5';
-          return;
-        }
 
-        loginMessage.textContent = 'Login successful. Welcome back!';
-        loginMessage.style.display = 'block';
-        loginMessage.style.color = '#bbf7d0';
-        loginForm.reset();
-        window.location.href = 'start.html';
-      });
+    console.log("Attempting login for:", studentId);
+});
