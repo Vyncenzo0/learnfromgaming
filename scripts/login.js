@@ -4,10 +4,10 @@ const loginMessage = document.getElementById('login-message');
 loginForm.addEventListener('submit', (event) => {
   event.preventDefault();
 
-  const email = document.getElementById('student-id').value.trim();
+  const studentId = document.getElementById('student-id').value.trim();
   const password = document.getElementById('password').value;
 
-  if (!email || !password) {
+  if (!studentId || !password) {
     loginMessage.textContent = 'Please fill in all fields.';
     loginMessage.style.display = 'block';
     loginMessage.style.color = '#fca5a5';
