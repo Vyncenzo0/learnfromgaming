@@ -17,27 +17,27 @@
         <form id="register-form" novalidate>
           <div class="field">
             <label for="name">Full name</label>
-            <input name="name" type="text" required />
+            <input id="name" name="name" type="text" required />
           </div>
 
           <div class="field">
             <label for="student-id">Student ID</label>
-            <input id="student-id" type="text" required />
+            <input id="student-id" name="student-id" type="text" required />
           </div>
 
           <div class="field">
             <label for="password">Password</label>
-            <input name="password" type="password" required />
+            <input id="password" name="password" type="password" required />
           </div>
 
           <div class="field">
             <label for="confirm-password">Confirm password</label>
-            <input name="confirm-password" type="password" required />
+            <input id="confirm-password" name="confirm-password" type="password" required />
           </div>
 
           <div class="field">
             <label for="hint-question">Personal hint question</label>
-            <select id="hint-question" required>
+            <select id="hint-question" name="hint-question" required>
               <option value="" selected disabled hidden>Choose a personal hint question</option>
               <option value="What is your favorite color?">What is your favorite color?</option>
               <option value="What is your first pet’s name?">What is your first pet’s name?</option>
@@ -46,8 +46,8 @@
           </div>
 
           <div class="field">
-            <label for="hint_answer">Personal hint answer</label>
-            <input name="hint_answer" type="text" required />
+            <label for="hint-answer">Personal hint answer</label>
+            <input id="hint-answer" name="hint-answer" type="text" required />
           </div>
 
           <button type="submit">Create account</button>
