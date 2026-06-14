@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Build Simulator: Ultimate Edition</title>
+    <style>
+        :root { --bg: #121212; --card: #1e1e1e; --accent: #7c4dff; --success: #00e676; --danger: #ff5252; --text: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; overflow-x: hidden; }
+        
+        /* --- MAIN MENU STYLES --- */
+        .main-menu { 
+            width: 100%; max-width: 1000px; text-align: center; 
+            animation: fadeIn 0.5s ease-out;
+        }
+        .menu-title { font-size: 3em; margin-bottom: 10px; background: linear-gradient(45deg, #7c4dff, #00e676); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .menu-subtitle { color: #aaa; margin-bottom: 40px; font-size: 1.1em; }
+        
+        .mission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .mission-card { 
+            background: var(--card); border: 1px solid #333; border-radius: 15px; padding: 25px; 
+            text-align: left; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .mission-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(124, 77, 255, 0.2); }
+        
+        /* COMPLETED JOB STYLES */
+        .mission-card.completed {
+            border-color: var(--success);
+            background: rgba(0, 230, 118, 0.05);
+        }
+        .mission-card.completed::after {
+            content: '✅ JOB DONE';
+            position: absolute;
+            top: 15px; right: 15px;
+            background: var(--success);
+            color: #000;
+            font-size: 0.7em;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0, 230, 118, 0.4);
+        }
+
+        .mission-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+        .mission-name { font-weight: bold; font-size: 1.1em; color: white; }
+        .mission-budget { color: var(--success); font-weight: bold; font-size: 0.9em; background: rgba(0, 230, 118, 0.1); padding: 4px 8px; border-radius: 20px; }
+        .mission-bio { font-size: 0.85em; color: #888; line-height: 1.4; margin-bottom: 15px; font-style: italic; }
+        .mission-tag { font-size: 0.75em; color: var(--accent); border: 1px solid var(--accent); padding: 3px 8px; border-radius: 5px; display: inline-block; }
+        
+        /* RESET BUTTON STYLE */
+        .reset-btn {
+            margin-top: 30px; background: transparent; color: #666; 
+            border: 1px solid #333; padding: 10px 20px; border-radius: 50px;
+            cursor: pointer; font-size: 0.85em; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .reset-btn:hover { border-color: var(--danger); color: var(--danger); background: rgba(255, 82, 82, 0.05); }
+
+        /* --- GAME CONTAINER (Hidden by default) --- */
+        .game-container { 
+            display: none; width: 100%; max-width: 1200px; background: var(--card); 
+            border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.8); 
+            grid-template-columns: 320px 1fr 350px; height: 95vh; animation: slideUp 0.5s ease-out;
+        }
+        .game-container.active { display: grid; }
+        
+        /* Left Panel: Missions (Now acts as Current Job Info) */
+        .mission-panel { padding: 20px; border-right: 1px solid #333; overflow-y: auto; background: #181818; }
+        .panel-title { font-size: 1.1em; color: var(--accent); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { font-size: 0.8em; color: #888; cursor: pointer; text-transform: none; letter-spacing: normal; transition: color 0.2s; }
+        .back-btn:hover { color: white; text-decoration: underline; }
+        
+        .current-job-card { background: rgba(124, 77, 255, 0.1); border: 1px solid var(--accent); border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+        .job-status { font-size: 0.8em; color: var(--success); margin-bottom: 5px; font-weight: bold; }
+        
+        /* Center Panel: Visual Build Area */
+        .build-area { padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; background: radial-gradient(circle at center, #2a2a2a 0%, #121212 100%); }
+        
+        /* VISUAL PC CASE */
+        .pc-case { 
+            width: 320px; height: 480px; background: #000; border: 4px solid #444; 
+            border-radius: 15px; position: relative; margin-top: 10px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8); overflow: hidden;
+            transition: all 0.5s;
+        }
+        .pc-case.case-glass { border-color: #7c4dff; box-shadow: 0 0 20px rgba(124, 77, 255, 0.3); }
+        .pc-case.case-glass::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none; z-index: 5;
+        }
+        .pc-case.rgb-active { animation: rgbPulse 3s infinite alternate; }
+        @keyframes rgbPulse { 0% { box-shadow: 0 0 30px rgba(255,0,0,0.4); } 33% { box-shadow: 0 0 30px rgba(0,255,0,0.4); } 66% { box-shadow: 0 0 30px rgba(0,0,255,0.4); } 100% { box-shadow: 0 0 30px rgba(255,0,255,0.4); } }
+        .case-glass-overlay { position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.02); pointer-events: none; z-index: 10; }
+        
+        /* Component Visuals inside Case */
+        .vis-mobo { position: absolute; top: 30px; left: 30px; right: 30px; height: 220px; background: #2d3436; border-radius: 5px; border: 1px solid #555; display: flex; justify-content: center; align-items: center; font-size: 0.7em; color: #666; transition: all 0.2s; }
+        .vis-cooler-stock { width: 50px; height: 50px; border-radius: 50%; position: absolute; top: 45px; left: 50%; transform: translateX(-50%); display: none; border: 2px solid #aaa; background: radial-gradient(circle, #ddd 30%, #999 100%); }
+        .vis-cooler-tower { width: 70px; height: 90px; background: #444; position: absolute; top: 30px; left: 50%; transform: translateX(-50%); display: none; border-radius: 4px; border: 2px solid #666; background: repeating-linear-gradient(0deg, #333, #333 5px, #555 5px, #555 10px); }
+        .vis-fan-spin { animation: spin 0.5s linear infinite; }
+        @keyframes spin { 100% { transform: translateX(-50%) rotate(360deg); } }
+        .vis-cpu { display: none; }
+        .vis-ram { width: 10px; height: 80px; background: #333; position: absolute; top: 50px; right: 60px; display: none; border-left: 2px solid var(--accent); transition: all 0.2s; }
+        .vis-gpu { width: 220px; height: 45px; background: #444; position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); border-radius: 4px; display: none; border-bottom: 3px solid var(--danger); transition: all 0.2s; }
+        .vis-psu { width: 200px; height: 55px; background: #222; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); border-radius: 4px; display: none; border-top: 2px solid #555; transition: all 0.2s; }
+        .vis-storage { width: 80px; height: 15px; position: absolute; top: 190px; left: 50px; display: none; border-radius: 2px; background: linear-gradient(90deg, #ffd700, #b8860b); border: 1px solid #fff; transition: all 0.2s; }
+        
+        .installed-part { cursor: pointer !important; }
+        .installed-part:hover { filter: brightness(1.3) drop-shadow(0 0 5px rgba(255,255,255,0.5)); transform: scale(1.02); }
+        .installed-part::after { content: '×'; position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .installed-part:hover::after { opacity: 1; }
+        
+        .budget-bar { margin-top: 20px; width: 100%; text-align: center; }
+        .budget-text { font-size: 1.2em; font-weight: bold; margin-bottom: 5px; }
+        .progress-bg { width: 100%; height: 8px; background: #333; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.3s, background 0.3s; }
+        
+        /* Right Panel: Store */
+        .store-panel { padding: 20px; border-left: 1px solid #333; overflow-y: auto; background: #181818; }
+        .part-card { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .part-card.draggable { cursor: grab; }
+        .part-card.draggable:hover { border-color: var(--accent); background: #2a2a2a; }
+        .part-card.installed { border-color: var(--success); background: rgba(0, 230, 118, 0.05); }
+        .remove-btn { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        .part-name { font-size: 0.9em; font-weight: bold; margin-bottom: 3px; }
+        .part-specs { font-size: 0.75em; color: #888; }
+        .part-price { font-weight: bold; color: var(--success); font-size: 0.9em; }
+        
+        .action-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1em; transition: all 0.2s; }
+        .action-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .action-btn:disabled { background: #444; cursor: not-allowed; transform: none; }
+        
+        /* Modal / Benchmark Overlay */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+        .overlay.active { display: flex; }
+        .benchmark-box { background: #1e1e1e; padding: 30px; border-radius: 20px; width: 90%; max-width: 550px; border: 2px solid var(--accent); text-align: center; }
+        .bench-title { font-size: 1.5em; margin-bottom: 20px; color: var(--accent); }
+        .bench-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; text-align: left; }
+        .bench-item { background: #252525; padding: 15px; border-radius: 10px; border: 1px solid #333; }
+        .bench-label { font-size: 0.8em; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+        .bench-value { font-size: 1.8em; font-weight: bold; color: var(--success); }
+        .bench-sub { font-size: 0.75em; color: #aaa; margin-top: 3px; }
+        .analysis-box { background: rgba(124, 77, 255, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: left; font-size: 0.9em; line-height: 1.5; }
+        .analysis-title { color: var(--accent); font-weight: bold; margin-bottom: 5px; display: block; }
+        .customer-feedback { margin-top: 10px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; font-style: italic; color: #ddd; }
+        
+        /* CUSTOM CONFIRMATION MODAL STYLES */
+        .confirm-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .confirm-modal.active { display: flex; animation: fadeIn 0.2s; }
+        .confirm-box {
+            background: #1e1e1e; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px;
+            border: 1px solid #333; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .confirm-icon { font-size: 3em; margin-bottom: 15px; display: block; }
+        .confirm-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; color: white; }
+        .confirm-msg { color: #aaa; font-size: 0.9em; margin-bottom: 25px; line-height: 1.4; }
+        .confirm-actions { display: flex; gap: 10px; justify-content: center; }
+        .btn-confirm {
+            flex: 1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
+            border: none; transition: all 0.2s; font-size: 0.95em;
+        }
+        /* YES Button - Highlighted */
+        .btn-yes {
+            background: var(--danger); color: white;
+            box-shadow: 0 0 15px rgba(255, 82, 82, 0.3);
+        }
+        .btn-yes:hover { background: #ff1744; transform: translateY(-2px); }
+        /* NO Button - Plain */
+        .btn-no {
+            background: transparent; border: 1px solid #444; color: #888;
+        }
+        .btn-no:hover { border-color: #666; color: white; background: #252525; }
+
+        @media (max-width: 1000px) { .game-container { grid-template-columns: 1fr; height: auto; } .pc-case { margin: 20px auto; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- ================= MAIN MENU ================= -->
+    <div class="main-menu" id="mainMenu">
+        <h1 class="menu-title">🖥️ PC BUILD SIMULATOR</h1>
+        <p class="menu-subtitle">Select a client mission to start building</p>
+        
+        <div class="mission-grid" id="missionGrid">
+            <!-- Missions will be injected here -->
+        </div>
+
+        <!-- RESET BUTTON ADDED HERE -->
+        <button class="reset-btn" onclick="askResetProgress()">↺ Reset All Progress</button>
+    </div>
+
+    <!-- ================= GAME CONTAINER ================= -->
+    <div class="game-container" id="gameContainer">
+        <!-- LEFT: CURRENT JOB INFO -->
+        <div class="mission-panel">
+            <div class="panel-title">
+                <span>📋 Current Job</span>
+                <span class="back-btn" onclick="askBackToMenu()">← Change Job</span>
+            </div>
+            
+            <div class="current-job-card" id="currentJobCard">
+                <div class="job-status">● ACTIVE MISSION</div>
+                <div class="customer-name" style="font-weight:bold; margin-bottom:5px;" id="jobName">--</div>
+                <div class="customer-bio" style="font-size:0.85em; color:#aaa; line-height:1.4; margin-bottom:10px; font-style:italic;" id="jobBio">--</div>
+                <div class="mission-req" style="font-size:0.8em; color:var(--accent); background:rgba(124,77,255,0.1); padding:5px 8px; border-radius:5px; display:inline-block;" id="jobReq">--</div>
+            </div>
+
+            <div style="margin-top:20px; font-size:0.8em; color:#666;">
+                <p>💡 Tip: Drag parts from the store to the case.</p>
+                <p>💡 Click installed parts to remove them.</p>
+            </div>
+        </div>
+
+        <!-- CENTER: VISUAL BUILD -->
+        <div class="build-area">
+            <div class="panel-title" style="align-self:flex-start;">🛠️ Build Station</div>
+            
+            <div class="pc-case" id="pcCase">
+                <div class="case-glass-overlay"></div>
+                <div class="vis-mobo" id="visMobo">Motherboard Slot</div>
+                <div class="vis-cooler-stock" id="visCoolerStock"></div>
+                <div class="vis-cooler-tower" id="visCoolerTower"></div>
+                <div class="vis-cpu" id="visCpu"></div>
+                <div class="vis-ram" id="visRam"></div>
+                <div class="vis-gpu" id="visGpu"></div>
+                <div class="vis-psu" id="visPsu"></div>
+                <div class="vis-storage" id="visStorage"></div>
+            </div>
+
+            <div class="budget-bar">
+                <div class="budget-text">Budget: ₱<span id="budgetMax">0</span> | Spent: ₱<span id="spent">0</span></div>
+                <div class="progress-bg"><div class="progress-fill" id="budgetProgress"></div></div>
+            </div>
+
+            <button class="action-btn" id="submitBtn" onclick="runBenchmark()" disabled>🚀 Run Benchmark & Submit</button>
+        </div>
+
+        <!-- RIGHT: STORE -->
+        <div class="store-panel">
+            <div class="panel-title">🛒 Component Store</div>
+            <div id="storeContainer"></div>
+        </div>
+    </div>
+
+    <!-- BENCHMARK OVERLAY -->
+    <div class="overlay" id="benchOverlay">
+        <div class="benchmark-box">
+            <div class="bench-title">⏳ Running Benchmarks...</div>
+            <div id="benchResults" style="display:none;">
+                <div class="bench-grid">
+                    <div class="bench-item"><div class="bench-label">Cyberpunk 2077</div><div class="bench-value" id="fps1">--</div><div class="bench-sub">Avg FPS</div></div>
+                    <div class="bench-item"><div class="bench-label">Valorant</div><div class="bench-value" id="fps2">--</div><div class="bench-sub">Avg FPS</div></div>
+                    <div class="bench-item"><div class="bench-label">Blender</div><div class="bench-value" id="score3">--</div><div class="bench-sub">Samples/min</div></div>
+                    <div class="bench-item"><div class="bench-label">Overall</div><div class="bench-value" id="overallScore" style="color:var(--accent)">--</div><div class="bench-sub">Tier</div></div>
+                </div>
+                <div class="analysis-box" id="hwAnalysis"><span class="analysis-title">🔍 Analysis:</span>Balanced.</div>
+                <div class="customer-feedback" id="custFeedback"></div>
+                <button class="action-btn" onclick="completeJobAndClose()">✅ Complete Job</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRMATION MODAL FOR BACK TO MENU -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-box">
+            <span class="confirm-icon">⚠️</span>
+            <div class="confirm-title">Are you sure?</div>
+            <div class="confirm-msg">Current build progress will be lost if you change jobs now.</div>
+            <div class="confirm-actions">
+                <button class="btn-confirm btn-no" onclick="cancelBackToMenu()">NO</button>
+                <button class="btn-confirm btn-yes" onclick="confirmBackToMenu()">YES</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRMATION MODAL FOR RESET PROGRESS -->
+    <div class="confirm-modal" id="resetConfirmModal">
+        <div class="confirm-box">
+            <span class="confirm-icon">🗑️</span>
+            <div class="confirm-title">Reset All Progress?</div>
+            <div class="confirm-msg">This will permanently delete all your completed jobs and scores. This action cannot be undone.</div>
+            <div class="confirm-actions">
+                <button class="btn-confirm btn-no" onclick="cancelResetProgress()">NO</button>
+                <button class="btn-confirm btn-yes" onclick="confirmResetProgress()">YES</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const missions = [
+            { id: 1, name: "John Dela Cruz", bio: "First time gamer. Valorant/Minecraft only.", budget: 30000, req: "Entry Gaming" },
+            { id: 2, name: "Sarah Tech", bio: "Video editor. Needs fast rendering.", budget: 60000, req: "Workstation (32GB+ RAM)" },
+            { id: 3, name: "RGB King", bio: "Performance + Aesthetics. Love lights!", budget: 100000, req: "High-End + RGB" },
+            { id: 4, name: "Office Manager", bio: "5 units for staff. Word/Excel only.", budget: 25000, req: "Basic Office" },
+            { id: 5, name: "Streamer", bio: "Stream while gaming. Strong CPU needed.", budget: 70000, req: "Streaming Setup" },
+            { id: 6, name: "College Student", bio: "IT student. VMs and coding.", budget: 35000, req: "Dev Workstation" },
+            { id: 7, name: "Gamer", bio: "Reliable mid-range. Not too hot.", budget: 40000, req: "Reliable Mid-Range" },
+            { id: 8, name: "Small Business", bio: "Mini-server for files. No GPU needed.", budget: 45000, req: "Server (No GPU)" },
+            { id: 9, name: "Crypto Whale", bio: "Walang budget limit. Gusto ko ng pinakamalakas na PC sa mundo ngayon. Pera is no object!", budget: 310000, req: "Ultimate Flagship (RTX 4090)" }
+        ];
+
+        const partsDB = {
+            cpu: [
+                { id: 'c1', name: 'i3-12100F', price: 6500, score: 40, socket: 'LGA1700' },
+                { id: 'c2', name: 'Ryzen 5 5600', price: 8500, score: 65, socket: 'AM4' },
+                { id: 'c3', name: 'i5-12400F', price: 10500, score: 80, socket: 'LGA1700' },
+                { id: 'c4', name: 'Ryzen 7 5700X', price: 13500, score: 95, socket: 'AM4' },
+                { id: 'c5', name: 'i5-13400F', price: 14500, score: 100, socket: 'LGA1700' },
+                { id: 'c6', name: 'Ryzen 5 7600', price: 15500, score: 110, socket: 'AM5' },
+                { id: 'c7', name: 'i7-13700K', price: 24000, score: 140, socket: 'LGA1700' },
+                { id: 'c8', name: 'Ryzen 9 7900X', price: 28000, score: 160, socket: 'AM5' },
+                { id: 'c9', name: 'Intel i9-14900K', price: 38000, score: 180, socket: 'LGA1700' },
+                { id: 'c10', name: 'Ryzen 9 7950X3D', price: 42000, score: 190, socket: 'AM5' }
+            ],
+            mobo: [
+                { id: 'm1', name: 'H610M DDR4', price: 4500, socket: 'LGA1700' },
+                { id: 'm2', name: 'B550M DS3H', price: 5500, socket: 'AM4' },
+                { id: 'm3', name: 'B660M Mortar', price: 7500, socket: 'LGA1700' },
+                { id: 'm4', name: 'X570 Tomahawk', price: 9500, socket: 'AM4' },
+                { id: 'm5', name: 'B760M Aorus', price: 9000, socket: 'LGA1700' },
+                { id: 'm6', name: 'B650M PG', price: 10500, socket: 'AM5' },
+                { id: 'm7', name: 'Z790-P Prime', price: 14000, socket: 'LGA1700' },
+                { id: 'm8', name: 'X670E Crosshair', price: 22000, socket: 'AM5' },
+                { id: 'm9', name: 'Z790 GODLIKE', price: 45000, socket: 'LGA1700' },
+                { id: 'm10', name: 'X670E HERO', price: 35000, socket: 'AM5' }
+            ],
+            ram: [
+                { id: 'r1', name: '8GB DDR4', price: 2000, size: 8, rgb: false },
+                { id: 'r2', name: '16GB DDR4', price: 3500, size: 16, rgb: false },
+                { id: 'r3', name: '16GB DDR4 RGB', price: 4200, size: 16, rgb: true },
+                { id: 'r4', name: '32GB DDR4 RGB', price: 6500, size: 32, rgb: true },
+                { id: 'r5', name: '16GB DDR5', price: 4800, size: 16, rgb: false },
+                { id: 'r6', name: '32GB DDR5 RGB', price: 8500, size: 32, rgb: true },
+                { id: 'r7', name: '64GB DDR5 RGB', price: 16000, size: 64, rgb: true },
+            ],
+            gpu: [
+                { id: 'g1', name: 'GTX 1650', price: 8000, score: 30 },
+                { id: 'g2', name: 'RTX 3050', price: 14000, score: 55 },
+                { id: 'g3', name: 'RX 6600', price: 16000, score: 70 },
+                { id: 'g4', name: 'RTX 3060', price: 20000, score: 90 },
+                { id: 'g5', name: 'RTX 4060', price: 22000, score: 105 },
+                { id: 'g6', name: 'RX 7700 XT', price: 28000, score: 130 },
+                { id: 'g7', name: 'RTX 4070', price: 38000, score: 160 },
+                { id: 'g8', name: 'RTX 4080', price: 65000, score: 220 },
+                { id: 'g9', name: 'RTX 4080 SUPER', price: 75000, score: 250 },
+                { id: 'g10', name: 'RTX 4090 24GB', price: 120000, score: 350 }
+            ],
+            storage: [
+                { id: 's1', name: '256GB NVMe', price: 1500 },
+                { id: 's2', name: '500GB NVMe', price: 2500 },
+                { id: 's3', name: '1TB NVMe', price: 4000 },
+                { id: 's4', name: '2TB NVMe', price: 7500 },
+                { id: 's5', name: '4TB HDD', price: 5000 },
+                { id: 's6', name: '4TB NVMe Gen5', price: 25000 }
+            ],
+            psu: [
+                { id: 'p1', name: '450W Bronze', price: 2000, watts: 450 },
+                { id: 'p2', name: '550W Bronze', price: 2800, watts: 550 },
+                { id: 'p3', name: '650W Gold', price: 4000, watts: 650 },
+                { id: 'p4', name: '750W Gold', price: 5500, watts: 750 },
+                { id: 'p5', name: '850W Gold', price: 7000, watts: 850 },
+                { id: 'p6', name: '1000W Platinum', price: 10000, watts: 1000 },
+                { id: 'p7', name: '1200W Titanium', price: 15000, watts: 1200 }
+            ],
+            cooler: [
+                { id: 'cl1', name: 'Stock Fan', price: 0, type: 'stock', noise: 'loud' },
+                { id: 'cl2', name: 'Deepcool AK400', price: 2000, type: 'tower', noise: 'quiet' },
+                { id: 'cl3', name: 'Thermalright PA120', price: 2500, type: 'tower', noise: 'quiet' },
+                { id: 'cl4', name: 'NZXT Kraken 240', price: 6000, type: 'aio', noise: 'silent' },
+                { id: 'cl5', name: 'Corsair H150i 360', price: 9000, type: 'aio', noise: 'silent' },
+                { id: 'cl6', name: 'NZXT Kraken Elite 360', price: 15000, type: 'aio', noise: 'silent' }
+            ],
+            keyboard: [
+                { id: 'kb1', name: 'Generic Membrane', price: 300, type: 'office' },
+                { id: 'kb2', name: 'Logitech MK270', price: 1200, type: 'office' },
+                { id: 'kb3', name: 'Redragon K552', price: 2500, type: 'mechanical' },
+                { id: 'kb4', name: 'Keychron K2', price: 4500, type: 'mechanical' },
+                { id: 'kb5', name: 'Razer Huntsman V2', price: 8000, type: 'mechanical' },
+                { id: 'kb6', name: 'Wooting 60HE', price: 12000, type: 'mechanical' }
+            ],
+            mouse: [
+                { id: 'ms1', name: 'Generic Mouse', price: 200, type: 'office' },
+                { id: 'ms2', name: 'Logitech M185', price: 600, type: 'office' },
+                { id: 'ms3', name: 'Logitech G102', price: 1200, type: 'gaming' },
+                { id: 'ms4', name: 'Razer DeathAdder', price: 3500, type: 'gaming' },
+                { id: 'ms5', name: 'G Pro X Superlight', price: 7500, type: 'gaming' },
+                { id: 'ms6', name: 'Razer Viper V3 Pro', price: 9500, type: 'gaming' }
+            ],
+            casing: [
+                { id: 'cs1', name: 'Basic Office Case', price: 1500, type: 'basic', glass: false },
+                { id: 'cs2', name: 'Tecware Flatline', price: 2500, type: 'gaming', glass: true },
+                { id: 'cs3', name: 'NZXT H5 Flow', price: 5000, type: 'gaming', glass: true },
+                { id: 'cs4', name: 'Lian Li O11 Dynamic', price: 7500, type: 'gaming', glass: true },
+                { id: 'cs5', name: 'Hyte Y70 Touch', price: 18000, type: 'gaming', glass: true }
+            ]
+        };
+
+        let currentMission = null;
+        let build = {};
+        let draggedPart = null;
+        
+        // Load completed jobs from localStorage
+        let completedJobs = JSON.parse(localStorage.getItem('pcBuilderCompletedJobs')) || [];
+
+        // --- INIT & MENU LOGIC ---
+        function init() {
+            renderMainMenu();
+        }
+
+        function renderMainMenu() {
+            const grid = document.getElementById('missionGrid');
+            grid.innerHTML = '';
+            missions.forEach(m => {
+                const isCompleted = completedJobs.includes(m.id);
+                const card = document.createElement('div');
+                card.className = `mission-card ${isCompleted ? 'completed' : ''}`;
+                card.onclick = () => selectMission(m);
+                card.innerHTML = `
+                    <div class="mission-header">
+                        <div class="mission-name">👤 ${m.name}</div>
+                        <div class="mission-budget">₱${m.budget.toLocaleString()}</div>
+                    </div>
+                    <div class="mission-bio">"${m.bio}"</div>
+                    <div class="mission-tag">${m.req}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectMission(m) {
+            currentMission = m;
+            build = {};
+            
+            // Update UI
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameContainer').classList.add('active');
+            
+            // Update Job Info Panel
+            document.getElementById('jobName').textContent = m.name;
+            document.getElementById('jobBio').textContent = `"${m.bio}"`;
+            document.getElementById('jobReq').textContent = m.req;
+            
+            updateVisuals();
+            updateBudget();
+            renderStore();
+            document.getElementById('budgetMax').textContent = m.budget.toLocaleString();
+            checkCompleteness();
+        }
+
+        // --- RESET PROGRESS FUNCTIONS ---
+        function askResetProgress() {
+            document.getElementById('resetConfirmModal').classList.add('active');
+        }
+
+        function cancelResetProgress() {
+            document.getElementById('resetConfirmModal').classList.remove('active');
+        }
+
+        function confirmResetProgress() {
+            document.getElementById('resetConfirmModal').classList.remove('active');
+            localStorage.removeItem('pcBuilderCompletedJobs');
+            completedJobs = [];
+            renderMainMenu();
+            alert("All progress has been successfully reset!");
+        }
+
+        // --- CUSTOM CONFIRMATION MODAL LOGIC (FOR BACK TO MENU) ---
+        function askBackToMenu() {
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function cancelBackToMenu() {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        function confirmBackToMenu() {
+            document.getElementById('confirmModal').classList.remove('active');
+            document.getElementById('gameContainer').classList.remove('active');
+            document.getElementById('mainMenu').style.display = 'block';
+            currentMission = null;
+            build = {};
+            renderMainMenu(); // Re-render to show any new completed jobs
+        }
+
+        // --- STORE & BUILD LOGIC ---
+        function renderStore() {
+            const container = document.getElementById('storeContainer');
+            container.innerHTML = '';
+            Object.keys(partsDB).forEach(cat => {
+                const label = document.createElement('div');
+                label.style.cssText = "font-size:0.8em; color:#666; margin:15px 0 5px; text-transform:uppercase;";
+                label.textContent = cat;
+                container.appendChild(label);
+
+                partsDB[cat].forEach(part => {
+                    const isInstalled = build[cat]?.id === part.id;
+                    const card = document.createElement('div');
+                    card.className = `part-card ${isInstalled ? 'installed' : 'draggable'}`;
+                    
+                    if (!isInstalled) {
+                        card.draggable = true;
+                        card.dataset.cat = cat;
+                        card.dataset.id = part.id;
+                        card.addEventListener('dragstart', e => { draggedPart = {cat, part}; card.style.opacity='0.5'; });
+                        card.addEventListener('dragend', () => { draggedPart=null; card.style.opacity='1'; });
+                    }
+
+                    let actionHtml = `<div class="part-price">₱${part.price.toLocaleString()}</div>`;
+                    if (isInstalled) {
+                        actionHtml = `<button class="remove-btn" onclick="removeComponent('${cat}')">REMOVE</button>`;
+                    }
+
+                    card.innerHTML = `
+                        <div style="flex:1">
+                            <div class="part-name">${part.name} ${isInstalled?'✅':''}</div>
+                            <div class="part-specs">${getSpecs(cat, part)}</div>
+                        </div>
+                        ${actionHtml}
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        function getSpecs(cat, p) {
+            if(cat==='cpu') return `${p.socket} | Score:${p.score}`;
+            if(cat==='mobo') return p.socket;
+            if(cat==='ram') return `${p.size}GB ${p.rgb?'RGB':''}`;
+            if(cat==='gpu') return `Score:${p.score}`;
+            if(cat==='psu') return `${p.watts}W`;
+            if(cat==='cooler') return `${p.type.toUpperCase()} | ${p.noise}`;
+            if(cat==='keyboard'||cat==='mouse') return p.type.toUpperCase();
+            if(cat==='casing') return p.glass?'Glass':'Basic';
+            return '';
+        }
+
+        const pcCase = document.getElementById('pcCase');
+        pcCase.addEventListener('dragover', e => e.preventDefault());
+        pcCase.addEventListener('drop', e => {
+            e.preventDefault();
+            if(!draggedPart || !currentMission) return;
+            if(draggedPart.cat === 'cpu' && build.mobo && build.mobo.socket !== draggedPart.part.socket) { alert('❌ Socket Mismatch!'); return; }
+            if(draggedPart.cat === 'mobo' && build.cpu && build.cpu.socket !== draggedPart.part.socket) { alert('❌ Socket Mismatch!'); return; }
+            
+            build[draggedPart.cat] = draggedPart.part;
+            updateVisuals(); updateBudget(); renderStore(); checkCompleteness();
+        });
+
+        function removeComponent(category) {
+            if(!build[category]) return;
+            delete build[category];
+            updateVisuals(); updateBudget(); renderStore(); checkCompleteness();
+        }
+
+        function updateVisuals() {
+            const vis = id => document.getElementById(id);
+            ['visCpu','visRam','visGpu','visPsu','visStorage','visCoolerStock','visCoolerTower'].forEach(id => {
+                const el = vis(id); if(el){el.style.display='none';el.classList.remove('installed-part');el.onclick=null;}
+            });
+            
+            if(build.cpu){vis('visCpu').style.display='block';addClick(vis('visCpu'),'cpu');}
+            if(build.ram){vis('visRam').style.display='block';addClick(vis('visRam'),'ram');}
+            if(build.gpu){vis('visGpu').style.display='block';addClick(vis('visGpu'),'gpu');}
+            if(build.psu){vis('visPsu').style.display='block';addClick(vis('visPsu'),'psu');}
+            if(build.storage){vis('visStorage').style.display='block';addClick(vis('visStorage'),'storage');}
+            
+            if(build.cooler){
+                if(build.cooler.type==='stock'){vis('visCoolerStock').style.display='block';addClick(vis('visCoolerStock'),'cooler');}
+                else{vis('visCoolerTower').style.display='block';vis('visCoolerTower').classList.add('vis-fan-spin');addClick(vis('visCoolerTower'),'cooler');}
+            }
+            
+            const moboVis = vis('visMobo');
+            if(build.mobo){moboVis.textContent=build.mobo.name;moboVis.style.borderColor='#7c4dff';addClick(moboVis,'mobo');}
+            else{moboVis.textContent='Motherboard Slot';moboVis.style.borderColor='#555';moboVis.onclick=null;}
+            
+            const caseEl = vis('pcCase');
+            if(build.casing?.glass) caseEl.classList.add('case-glass'); else caseEl.classList.remove('case-glass');
+            if(build.ram?.rgb || build.casing?.type==='gaming') caseEl.classList.add('rgb-active'); else caseEl.classList.remove('rgb-active');
+        }
+
+        function addClick(el, cat) {
+            el.classList.add('installed-part');
+            el.title = 'Click to remove';
+            el.onclick = () => removeComponent(cat);
+        }
+
+        function updateBudget() {
+            if(!currentMission) return;
+            let total = 0; Object.values(build).forEach(p => total += p.price);
+            document.getElementById('spent').textContent = total.toLocaleString();
+            const pct = (total / currentMission.budget) * 100;
+            const bar = document.getElementById('budgetProgress');
+            bar.style.width = `${Math.min(pct,100)}%`;
+            bar.style.background = total > currentMission.budget ? '#ff5252' : '#00e676';
+        }
+
+        function checkCompleteness() {
+            if(!currentMission) { document.getElementById('submitBtn').disabled=true; return; }
+            let total=0; Object.values(build).forEach(p=>total+=p.price);
+            document.getElementById('submitBtn').disabled = !(Object.keys(build).length>0 && total<=currentMission.budget);
+        }
+
+        // --- BENCHMARK LOGIC ---
+        function runBenchmark() {
+            const overlay = document.getElementById('benchOverlay');
+            const results = document.getElementById('benchResults');
+            const title = document.querySelector('.bench-title');
+            overlay.classList.add('active'); results.style.display='none';
+            title.textContent="Running Benchmarks..."; title.style.color="var(--accent)";
+            
+            setTimeout(() => {
+                const cpu = build.cpu||{score:0,name:'None'}; const gpu = build.gpu||{score:0,name:'None'}; const ram = build.ram||{size:0,rgb:false};
+                let bf=1.0;
+                if(cpu.score>0&&gpu.score>0){const r=Math.min(cpu.score,gpu.score)/Math.max(cpu.score,gpu.score);bf=0.7+(0.3*r);}
+                else if(cpu.score===0||gpu.score===0) bf=0.3;
+                let rf=1.0; if(ram.size>=32)rf=1.3; else if(ram.size>=16)rf=1.15; else if(ram.size>0)rf=0.9; else rf=0.5;
+                
+                const fps1=Math.floor(Math.max(0,Math.min(((gpu.score*1.2)*bf*rf)+(cpu.score*0.1),300))); // Increased cap for 4090
+                const fps2=Math.floor(Math.max(0,Math.min(((cpu.score*2.5)*rf)+(gpu.score*0.4),800)));
+                const sc3=Math.floor(((cpu.score*1.5*rf)+(ram.size*3))*(build.gpu?1:0.8));
+                const avg=(fps1+(fps2/3)+(sc3/10))/3;
+                
+                let tier="Entry",tc="#aaa";
+                if(avg>150){tier="Godlike Beast 🐉";tc="#ffd700";} // New tier for whale builds
+                else if(avg>120){tier="Ultra High-End";tc="#e94560";}
+                else if(avg>80){tier="High-End";tc="#ff9f43";}
+                else if(avg>50){tier="Mid-Range";tc="#7c4dff";}
+                else if(avg>25){tier="Budget";tc="#00ff88";}
+                
+                document.getElementById('fps1').textContent=fps1;
+                document.getElementById('fps2').textContent=fps2;
+                document.getElementById('score3').textContent=sc3;
+                const ov=document.getElementById('overallScore'); ov.textContent=tier; ov.style.color=tc;
+                
+                let analysis=""; const miss=[];
+                ['cpu','mobo','ram','gpu','storage','psu'].forEach(p=>{if(!build[p])miss.push(p.toUpperCase());});
+                if(miss.length>0) analysis=`⚠️ INCOMPLETE: Missing ${miss.join(', ')}.`;
+                else if(cpu.score>0&&gpu.score>0){const r=Math.min(cpu.score,gpu.score)/Math.max(cpu.score,gpu.score);if(r<0.6){const w=cpu.score<gpu.score?"CPU":"GPU";analysis=`⚠️ BOTTLENECK: ${w} is weak.`;}else analysis="✅ BALANCED SYSTEM.";}
+                document.getElementById('hwAnalysis').innerHTML=`<span class="analysis-title">🔍 Analysis:</span>${analysis}`;
+                
+                let fb="";
+                if(miss.length>0) fb=`Missing: ${miss.join(', ')}!`;
+                else if(currentMission.id===9) { // Crypto Whale Feedback
+                     if(gpu.score >= 350) fb = "PERFECT! This is exactly what I wanted. Money well spent! 💰";
+                     else fb = "Good build, but why didn't you get the RTX 4090? I have unlimited budget!";
+                }
+                else if(currentMission.id===1) fb=fps2>144?"Grabe! Smooth!":(fps2>60?"Okay playable.":"Laggy.");
+                else if(currentMission.id===3) fb=(ram.rgb&&fps1>60)?"Astig ng lights!":(!ram.rgb?"Walang lights? Sayang.":"Lights ok pero mahina.");
+                else fb="Good build!";
+                document.getElementById('custFeedback').innerHTML=`<strong>${currentMission.name} says:</strong><br>"${fb}"`;
+                
+                title.textContent="✅ Benchmark Complete!"; title.style.color="#00ff88"; results.style.display='block';
+            }, 2000);
+        }
+
+        function completeJobAndClose() { 
+            // Mark job as done
+            if(currentMission && !completedJobs.includes(currentMission.id)) {
+                completedJobs.push(currentMission.id);
+                localStorage.setItem('pcBuilderCompletedJobs', JSON.stringify(completedJobs));
+            }
+            
+            document.getElementById('benchOverlay').classList.remove('active'); 
+            confirmBackToMenu(); // Go back to menu and refresh cards
+        }
+
+        init();
+    </script>
+</body>
+</html>

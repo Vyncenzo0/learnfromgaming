@@ -26,6 +26,7 @@
             <p>Battle across infinite cosmic sectors directly in your browser. No downloads. No installations. Pure arcade tracking mechanics.</p>
             <div class="hero-buttons">
                 <a href="#play" class="btn btn-primary">Launch Game</a>
+                <button id="randomGameBtn" class="btn btn-secondary" style="cursor: pointer;">Play Random Game</button>
                 <a href="#registerSection" class="btn btn-secondary">Join Academy</a>
             </div>
         </div>
@@ -59,7 +60,7 @@
                 <h3>Academy Registration</h3>
                 <p>Create an account to track your ship upgrades and server standings.</p>
                 
-                <form action="https://railway.app" method="POST" id="registerForm">
+                <form id="registerForm">
                     <div class="form-group">
                         <label for="regName">Pilot Name</label>
                         <input type="text" name="name" id="regName" placeholder="Enter custom callsign..." required>
@@ -85,7 +86,7 @@
                         <span>🔴 Sector 01-Active Connection</span>
                         <span id="playerNameDisplay" style="margin-left: 15px;">Pilot: Unknown</span>
                     </div>
-                    <button id="logoutBtnGame" class="btn-logout" style="cursor: pointer; padding: 4px 12px; background: #ff4a4a; color: white; border: none; border-radius: 4px; font-weight: bold;">Log Out</button>
+                    <button id="logoutBtnGame" class="btn-logout" style="display: none; cursor: pointer; padding: 4px 12px; background: #ff4a4a; color: white; border: none; border-radius: 4px; font-weight: bold;">Log Out</button>
                 </div>
                 <div class="mock-canvas">
                     <div class="play-trigger">
@@ -99,7 +100,7 @@
     </section>
 
     <footer>
-        <p>&copy; 2026 Nebula Quest Game Project. Shared deployment cluster on GitHub Pages and Railway.</p>
+        <p>&copy; 2026 Nebula Quest Game Project. Shared deployment cluster on GitHub Pages.</p>
     </footer>
     <script src="styles/home.js"></script>
 </body>
